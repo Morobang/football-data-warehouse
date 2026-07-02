@@ -1,6 +1,15 @@
-data/raw/*.csv
+# Raw data — 451 CSV files shouldn't live in git history
 data/raw/**/*.csv
+data/raw/*.csv
+!data/raw/.gitkeep
+
+# Python
 __pycache__/
+*.pyc
 .ipynb_checkpoints/
+
+# Databricks
 .databricks/
+
+# OS
 .DS_Store
