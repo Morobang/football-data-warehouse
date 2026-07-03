@@ -25,13 +25,28 @@ of this project.
 ```
 Raw CSVs (data/raw/, organized by country/division/season)
         ↓
-Bronze — ingested as-is, tagged with source metadata from folder path
+Bronze — frozen file copy only (Volume, no tables - see below)
         ↓
-Silver — schema drift reconciled, standardized columns, clean team names
+Silver — one table per league, seasons unioned + schema drift handled
         ↓
 Gold — star schema: fact_matches + dim_teams / dim_leagues / dim_seasons
         ↓
 EDA (SQL)  →  Model (match outcome classifier)
+```
+
+Bronze is deliberately file-only (no Delta tables) rather than the more
+typical one-table-per-source design: the original per-league-per-season
+Bronze design hit ~470 tables and triggered a Unity Catalog 500-table
+metastore quota warning before Silver or Gold even existed. See
+[docs/schema_notes.md](docs/schema_notes.md) for the full writeup.
+
+Catalog layout:
+```
+workspace (catalog)
+├── default   → Volume: football_raw       (original downloaded CSVs)
+├── bronze    → Volume: football_bronze     (frozen file copy, no tables)
+├── silver    → one Delta table per league  (england_premier_league, ...)
+└── gold      → star schema tables (not built yet)
 ```
 
 ## Data source
@@ -54,9 +69,12 @@ licensing note.
 
 ## Status
 
-🚧 Data collection complete (451 files, main + extra leagues). Bronze
-ingestion in progress, currently scoped to England only before expanding
-to all 11 countries.
+🚧 Data collection complete (478 files: 462 main-league + 16 extra-league).
+Bronze redesigned to a plain file copy (see Architecture above). Silver:
+all 5 England divisions done (Premier League, Championship, League One,
+League Two, National League) as individual tables in `workspace.silver`.
+Next: Scotland, then the remaining 9 main-league countries and 16 extra
+leagues, one Silver table per league.
 
 ## Author
 
